@@ -23,6 +23,8 @@ namespace ATrialTes1
             _petGroupServcie = new PetGroupServcie();
             _petShopMember = petShopMember;
             InitializeComponent();
+            dgvList.CellContentClick += dgvList_CellContentClick;
+
             //Load value for combobox
             List<PetGroup> groupList = _petGroupServcie.GetAll();
             cbGroup.DataSource = groupList;
@@ -31,10 +33,11 @@ namespace ATrialTes1
             //Read only for combobox
             cbGroup.DropDownStyle = ComboBoxStyle.DropDownList;
             //Load list first
-            if(petShopMember != null )
+            if (petShopMember != null)
             {
                 loadList();
-            }else
+            }
+            else
             {
                 MessageBox.Show("You dont have permistion to access this funtion", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -75,21 +78,18 @@ namespace ATrialTes1
         }
         private void dgvList_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            int PetId = int.Parse(dgvList.Rows[e.RowIndex].Cells[0].Value.ToString());
+            Pet pet = _petServcie.GetAll().Where(p => p.PetId == PetId).FirstOrDefault();
+
+            if (pet != null)
             {
-                DataGridViewRow selectedRow = dgvList.Rows[e.RowIndex];
-                txtID.Text = selectedRow.Cells[0].Value.ToString();
-                txtName.Text = selectedRow.Cells[1].Value.ToString();
-                dtpImportDate.Text = selectedRow.Cells[2].Value.ToString();
-                txtDec.Text = selectedRow.Cells[3].Value.ToString();
-                nudQuantity.Value = int.Parse(selectedRow.Cells[4].Value.ToString());
-                nudPrice.Value = int.Parse(selectedRow.Cells[5].Value.ToString());
-                cbGroup.Text = selectedRow.Cells[7].Value.ToString();
+                txtID.Text = pet.PetId.ToString();
+                txtName.Text = pet.PetName.ToString();
             }
         }
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            if(_petShopMember != null)
+            if (_petShopMember != null)
             {
                 List<Pet> searchResultList = _petServcie.SearchByKeyword(pet => pet.Quantity.ToString().Contains(txtSearch.Text) || pet.PetPrice.ToString().Contains(txtSearch.Text));
                 List<PetGroup> groupList = _petGroupServcie.GetAll();
@@ -120,7 +120,7 @@ namespace ATrialTes1
         }
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if(_petShopMember != null)
+            if (_petShopMember != null)
             {
                 Pet lastPet = _petServcie.GetAll().OrderByDescending(p => p.PetId).FirstOrDefault();
                 Pet newPet = new Pet()
@@ -143,9 +143,9 @@ namespace ATrialTes1
             }
             else
             {
-                MessageBox.Show("You dont have permistion to access this funtion","Error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("You dont have permistion to access this funtion", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            
+
         }
         private void btnUpdate_Click(object sender, EventArgs e)
         {
@@ -182,11 +182,11 @@ namespace ATrialTes1
             {
                 MessageBox.Show("You dont have permistion to access this funtion", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-           
+
         }
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            if(_petShopMember != null)
+            if (_petShopMember != null)
             {
                 try
                 {
@@ -214,6 +214,22 @@ namespace ATrialTes1
             else
             {
                 MessageBox.Show("You dont have permistion to access this funtion", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void dgvList_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int petID = int.Parse(dgvList.Rows[e.RowIndex].Cells[0].Value.ToString());
+            Pet pet = _petServcie.GetAll().Where(p => p.PetId == petID).FirstOrDefault();
+            if (pet != null)
+            {
+                txtID.Text = pet.PetId.ToString();
+                txtName.Text = pet.PetName.ToString();
+                dtpImportDate.Text = pet.ImportDate.ToString();
+                txtDec.Text = pet.PetDescription.ToString();
+                nudQuantity.Value = pet.Quantity.Value;
+                nudPrice.Value = Convert.ToDecimal(pet.PetPrice);
+                cbGroup.SelectedValue = pet.PetGroupId;
             }
         }
     }
